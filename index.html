@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/TableStorage/assets/css/style.css?v=afddff8d2cbeb12a2efbe0deb212e26db337efb0">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TableStorage | Repository pattern with POCO object support for storing to Azure / Cosmos DB Table Storage</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="TableStorage" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Repository pattern with POCO object support for storing to Azure / Cosmos DB Table Storage" />
+<meta property="og:description" content="Repository pattern with POCO object support for storing to Azure / Cosmos DB Table Storage" />
+<meta property="og:site_name" content="TableStorage" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TableStorage" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Repository pattern with POCO object support for storing to Azure / Cosmos DB Table Storage","headline":"TableStorage","name":"TableStorage","url":"/TableStorage/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/TableStorage/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          
+            <a id="forkme_banner" href="https://github.com/devlooped/TableStorage">View on GitHub</a>
+          
+
+          <h1 id="project_title">TableStorage</h1>
+          <h2 id="project_tagline">Repository pattern with POCO object support for storing to Azure / Cosmos DB Table Storage</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1 id="-tablestorage"><img src="https://raw.githubusercontent.com/devlooped/TableStorage/main/assets/img/icon-32.png" alt="Icon" /> TableStorage</h1>
+
+<p><a href="https://www.nuget.org/packages/Devlooped.TableStorage"><img src="https://img.shields.io/nuget/v/Devlooped.TableStorage.svg?color=royalblue" alt="Version" /></a> 
+<a href="https://www.nuget.org/packages/Devlooped.TableStorage"><img src="https://img.shields.io/nuget/dt/Devlooped.TableStorage.svg?color=green" alt="Downloads" /></a> 
+<a href="https://github.com/devlooped/TableStorage/blob/main/license.txt"><img src="https://img.shields.io/github/license/devlooped/TableStorage.svg?color=blue" alt="License" /></a> 
+<a href="https://github.com/devlooped/TableStorage/actions"><img src="https://github.com/devlooped/TableStorage/workflows/build/badge.svg?branch=main" alt="Build" /></a></p>
+
+<!-- include https://github.com/devlooped/.github/raw/main/sponsorlink.md -->
+<p><em>This project uses <a href="https://github.com/devlooped#sponsorlink">SponsorLink</a> 
+and may issue IDE-only warnings if no active sponsorship is detected.</em></p>
+
+<!-- https://github.com/devlooped/.github/raw/main/sponsorlink.md -->
+<!-- #content -->
+<p>Repository pattern with POCO object support for storing to Azure/CosmosDB Table Storage</p>
+
+<p><img src="https://raw.githubusercontent.com/devlooped/TableStorage/main/assets/img/tablestorage.png" alt="Screenshot of basic usage" /></p>
+
+<blockquote>
+  <p>NOTE: This library is a thin wrapper around the latest Azure SDK v12+ for Table Storage,
+and uses <a href="https://www.nuget.org/packages/Devlooped.CloudStorageAccount">CloudStorageAccount</a> which 
+is a 100% backwards compatible implementation of the Azure SDK v11 <code class="language-plaintext highlighter-rouge">CloudStorageAccount</code> class.</p>
+</blockquote>
+
+<h2 id="usage">Usage</h2>
+
+<p>Given an entity like:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">record</span> <span class="nf">Product</span><span class="p">(</span><span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Id</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">required</span> <span class="kt">string</span><span class="p">?</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="n">DateOnly</span> <span class="n">CreatedAt</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>NOTE: entity can have custom constructor, key properties can be read-only 
+(Category and Id in this case for example), and it doesn’t need to inherit 
+from anything, implement any interfaces or use 
+any custom attributes (unless you want to). As shown above, it can even be 
+a simple record type.</p>
+</blockquote>
+
+<p>The entity can be stored and retrieved with:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">storageAccount</span> <span class="p">=</span> <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">;</span> <span class="c1">// or production one</span>
+<span class="c1">// We lay out the parameter names for clarity only.</span>
+<span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span><span class="n">storageAccount</span><span class="p">,</span> 
+    <span class="n">tableName</span><span class="p">:</span> <span class="s">"Products"</span><span class="p">,</span>
+    <span class="n">partitionKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Category</span><span class="p">,</span> 
+    <span class="n">rowKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">product</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Product</span><span class="p">(</span><span class="s">"book"</span><span class="p">,</span> <span class="s">"1234"</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="n">Title</span> <span class="p">=</span> <span class="s">"Table Storage is Cool"</span><span class="p">,</span>
+  <span class="n">Price</span> <span class="p">=</span> <span class="m">25.5</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="c1">// Insert or Update behavior (aka "upsert")</span>
+<span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">PutAsync</span><span class="p">(</span><span class="n">product</span><span class="p">);</span>
+
+<span class="c1">// Enumerate all products in category "book"</span>
+<span class="k">await</span> <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">p</span> <span class="k">in</span> <span class="n">repo</span><span class="p">.</span><span class="nf">EnumerateAsync</span><span class="p">(</span><span class="s">"book"</span><span class="p">))</span>
+   <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">Price</span><span class="p">);</span>
+
+<span class="c1">// Query books priced in the 20-50 range, </span>
+<span class="c1">// project just title + price</span>
+<span class="k">await</span> <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">info</span> <span class="k">in</span> <span class="k">from</span> <span class="n">prod</span> <span class="k">in</span> <span class="n">repo</span><span class="p">.</span><span class="nf">CreateQuery</span><span class="p">()</span>
+                           <span class="k">where</span> <span class="n">prod</span><span class="p">.</span><span class="n">Price</span> <span class="p">&gt;=</span> <span class="m">20</span> <span class="n">and</span> <span class="n">prod</span><span class="p">.</span><span class="n">Price</span> <span class="p">&lt;=</span> <span class="m">50</span>
+                           <span class="k">select</span> <span class="k">new</span> <span class="p">{</span> <span class="n">prod</span><span class="p">.</span><span class="n">Title</span><span class="p">,</span> <span class="n">prod</span><span class="p">.</span><span class="n">Price</span> <span class="p">})</span>
+  <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"</span><span class="p">{</span><span class="n">info</span><span class="p">.</span><span class="n">Title</span><span class="p">}</span><span class="s">: </span><span class="p">{</span><span class="n">info</span><span class="p">.</span><span class="n">Price</span><span class="p">}</span><span class="s">"</span><span class="p">);</span>
+
+<span class="c1">// Get previously saved product.</span>
+<span class="n">Product</span> <span class="n">saved</span> <span class="p">=</span> <span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">GetAsync</span><span class="p">(</span><span class="s">"book"</span><span class="p">,</span> <span class="s">"1234"</span><span class="p">);</span>
+
+<span class="c1">// Delete product</span>
+<span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">DeleteAsync</span><span class="p">(</span><span class="s">"book"</span><span class="p">,</span> <span class="s">"1234"</span><span class="p">);</span>
+
+<span class="c1">// Can also delete passing entity</span>
+<span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">DeleteAsync</span><span class="p">(</span><span class="n">saved</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Attributes can also be used to eliminate the need for lambdas altogether when 
+the entity storage layout is known at compile time:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="nf">Table</span><span class="p">(</span><span class="s">"Products"</span><span class="p">)]</span>
+<span class="k">public</span> <span class="n">record</span> <span class="nf">Product</span><span class="p">([</span><span class="n">PartitionKey</span><span class="p">]</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="p">[</span><span class="n">RowKey</span><span class="p">]</span> <span class="kt">string</span> <span class="n">Id</span><span class="p">)</span> <span class="p">...</span> 
+
+<span class="kt">var</span> <span class="n">storageAccount</span> <span class="p">=</span> <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">;</span>
+<span class="c1">// Everything discovered from attributes.</span>
+<span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span><span class="n">storageAccount</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>See the <a href="#attributes">Attributes</a> section below for more details on how to use them.</p>
+
+<p>If the product were books for example, it might make sense to partition by author. 
+In that case, you could use a <code class="language-plaintext highlighter-rouge">TableRepository&lt;Book&gt;</code> when saving:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">record</span> <span class="nf">Book</span><span class="p">([</span><span class="n">RowKey</span><span class="p">]</span> <span class="kt">string</span> <span class="n">ISBN</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Title</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Author</span><span class="p">,</span> <span class="n">BookFormat</span> <span class="n">Format</span><span class="p">,</span> <span class="kt">int</span> <span class="n">Pages</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span><span class="n">storageAccount</span><span class="p">,</span> <span class="s">"Books"</span><span class="p">,</span>
+  <span class="n">partitionKey</span><span class="p">:</span> <span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Author</span><span class="p">);</span>
+
+<span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">PutAsync</span><span class="p">(</span><span class="n">book</span><span class="p">);</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note how you can mix and match attributes and explicit lambdas as needed. 
+The latter takes precedence over the former.</p>
+</blockquote>
+
+<p>And later on when listing/filtering books by a particular author, you can use 
+a <code class="language-plaintext highlighter-rouge">TablePartition&lt;Product&gt;</code> so all querying is automatically scoped to that author:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">partition</span> <span class="p">=</span> <span class="n">TablePartition</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Book</span><span class="p">&gt;(</span><span class="n">storageAccount</span><span class="p">,</span> <span class="s">"Books"</span><span class="p">,</span> 
+  <span class="n">partitionKey</span><span class="p">:</span> <span class="s">"Rick Riordan"</span><span class="p">);</span>
+
+<span class="c1">// Get Rick Riordan books, only from Disney/Hyperion, with over 1000 pages</span>
+<span class="kt">var</span> <span class="n">query</span> <span class="p">=</span> <span class="k">from</span> <span class="n">book</span> <span class="k">in</span> <span class="n">repo</span><span class="p">.</span><span class="nf">CreateQuery</span><span class="p">()</span>
+            <span class="k">where</span> 
+                <span class="n">book</span><span class="p">.</span><span class="n">ISBN</span><span class="p">.</span><span class="nf">CompareTo</span><span class="p">(</span><span class="s">"97814231"</span><span class="p">)</span> <span class="p">&gt;=</span> <span class="m">0</span> <span class="p">&amp;&amp;</span>
+                <span class="n">book</span><span class="p">.</span><span class="n">ISBN</span><span class="p">.</span><span class="nf">CompareTo</span><span class="p">(</span><span class="s">"97814232"</span><span class="p">)</span> <span class="p">&lt;</span> <span class="m">0</span> <span class="p">&amp;&amp;</span> 
+                <span class="n">book</span><span class="p">.</span><span class="n">Pages</span> <span class="p">&gt;=</span> <span class="m">1000</span>
+            <span class="k">select</span> <span class="k">new</span> <span class="p">{</span> <span class="n">book</span><span class="p">.</span><span class="n">ISBN</span><span class="p">,</span> <span class="n">book</span><span class="p">.</span><span class="n">Title</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<p>Using table partitions is quite convenient for handling reference data too, for example.
+Enumerating all entries in the partition wouldn’t be something you’d typically do for 
+your “real” data, but for reference data, it could come in handy.</p>
+
+<blockquote>
+  <p>NOTE: if access to the <code class="language-plaintext highlighter-rouge">Timestamp</code> managed by Azure Table Storage for the entity is needed, 
+just declare a property with that name with either <code class="language-plaintext highlighter-rouge">DateTimeOffset</code>, <code class="language-plaintext highlighter-rouge">DateTime</code> or <code class="language-plaintext highlighter-rouge">string</code> type
+to read it.</p>
+</blockquote>
+
+<p>Stored entities using <code class="language-plaintext highlighter-rouge">TableRepository</code> and <code class="language-plaintext highlighter-rouge">TablePartition</code> use individual columns for 
+properties, which makes it easy to browse the data (and query, as shown above!).</p>
+
+<blockquote>
+  <p>NOTE: partition and row keys can also be typed as <code class="language-plaintext highlighter-rouge">Guid</code></p>
+</blockquote>
+
+<p>Document-based storage is also available via <code class="language-plaintext highlighter-rouge">DocumentRepository</code> and <code class="language-plaintext highlighter-rouge">DocumentPartition</code> if 
+you don’t need the individual columns.</p>
+
+<!-- #documents -->
+<h2 id="document-storage">Document Storage</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">DocumentRepository.Create</code> and <code class="language-plaintext highlighter-rouge">DocumentPartition.Create</code> factory methods provide access 
+to document-based storage, exposing the a similar API as column-based storage.</p>
+
+<p>Document repositories cause entities to be persisted as a single document column, alongside type and version 
+information to handle versioning a the app level as needed.</p>
+
+<p>The API is mostly the same as for column-based repositories (document repositories implement 
+the same underlying <code class="language-plaintext highlighter-rouge">ITableStorage</code> interface):</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">record</span> <span class="nf">Product</span><span class="p">(</span><span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Id</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="k">public</span> <span class="kt">string</span><span class="p">?</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="n">DateOnly</span> <span class="n">CreatedAt</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">var</span> <span class="n">book</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Product</span><span class="p">(</span><span class="s">"book"</span><span class="p">,</span> <span class="s">"9781473217386"</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Title</span> <span class="p">=</span> <span class="s">"Neuromancer"</span><span class="p">,</span>
+    <span class="n">Price</span> <span class="p">=</span> <span class="m">7.32</span>
+<span class="p">};</span>
+
+<span class="c1">// Column-based storage</span>
+<span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span>
+    <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">,</span>
+    <span class="n">tableName</span><span class="p">:</span> <span class="s">"Products"</span><span class="p">,</span>
+    <span class="n">partitionKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Category</span><span class="p">,</span>
+    <span class="n">rowKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+
+<span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">PutAsync</span><span class="p">(</span><span class="n">book</span><span class="p">);</span>
+
+<span class="c1">// Document-based storage</span>
+<span class="kt">var</span> <span class="n">docs</span> <span class="p">=</span> <span class="n">DocumentRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span>
+    <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">,</span>
+    <span class="n">tableName</span><span class="p">:</span> <span class="s">"Documents"</span><span class="p">,</span>
+    <span class="n">partitionKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Category</span><span class="p">,</span>
+    <span class="n">rowKey</span><span class="p">:</span> <span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Id</span>
+    <span class="n">serializer</span><span class="p">:</span> <span class="p">[</span><span class="n">SERIALIZER</span><span class="p">]);</span>
+
+<span class="k">await</span> <span class="n">docs</span><span class="p">.</span><span class="nf">PutAsync</span><span class="p">(</span><span class="n">book</span><span class="p">);</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>If not provided, the serializer defaults to the <code class="language-plaintext highlighter-rouge">System.Text.Json</code>-based <code class="language-plaintext highlighter-rouge">DocumentSerializer.Default</code>.</p>
+</blockquote>
+
+<p>The resulting differences in storage can be seen in the following screenshots of the 
+<a href="https://azure.microsoft.com/en-us/features/storage-explorer/">Azure Storage Explorer</a>:</p>
+
+<p><img src="https://raw.githubusercontent.com/devlooped/TableStorage/main/assets/img/entity.png" alt="Screenshot of entity persisted with separate columns for properties" /></p>
+
+<p><img src="https://raw.githubusercontent.com/devlooped/TableStorage/main/assets/img/document.png" alt="Screenshot of entity persisted as a document" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Type</code> column persisted in the documents table is the <code class="language-plaintext highlighter-rouge">Type.FullName</code> of the persisted entity, and the 
+<code class="language-plaintext highlighter-rouge">Version</code> is the <code class="language-plaintext highlighter-rouge">[Major].[Minor]</code> of its assembly, which could be used for advanced data migration scenarios. 
+The major and minor version components are also provided as individual columns for easier querying 
+by various version ranges, using <code class="language-plaintext highlighter-rouge">IDocumentRepository.EnumerateAsync(predicate)</code>.</p>
+
+<!-- #documents -->
+
+<p>In addition to the default built-in JSON plain-text based serializer (which uses the 
+<a href="https://www.nuget.org/packages/system.text.json">System.Text.Json</a> package), there are other 
+alternative serializers for the document-based repository, including various binary serializers 
+which will instead persist the document as a byte array:</p>
+
+<p><a href="https://www.nuget.org/packages/Devlooped.TableStorage.Newtonsoft"><img src="https://img.shields.io/nuget/v/Devlooped.TableStorage.Newtonsoft.svg?color=royalblue&amp;label=Newtonsoft" alt="Json.NET" /></a> <a href="https://www.nuget.org/packages/Devlooped.TableStorage.Bson"><img src="https://img.shields.io/nuget/v/Devlooped.TableStorage.Bson.svg?color=royalblue&amp;label=Bson" alt="Bson" /></a> <a href="https://www.nuget.org/packages/Devlooped.TableStorage.MessagePack"><img src="https://img.shields.io/nuget/v/Devlooped.TableStorage.MessagePack.svg?color=royalblue&amp;label=MessagePack" alt="MessagePack" /></a> <a href="https://www.nuget.org/packages/Devlooped.TableStorage.Protobuf"><img src="https://img.shields.io/nuget/v/Devlooped.TableStorage.Protobuf.svg?color=royalblue&amp;label=Protobuf" alt="Protobuf" /></a></p>
+
+<p>You can pass the serializer to use to the factory method as follows:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(...,</span>
+    <span class="n">serializer</span><span class="p">:</span> <span class="p">[</span><span class="n">JsonDocumentSerializer</span><span class="p">|</span><span class="n">BsonDocumentSerializer</span><span class="p">|</span><span class="n">MessagePackDocumentSerializer</span><span class="p">|</span><span class="n">ProtobufDocumentSerializer</span><span class="p">].</span><span class="n">Default</span><span class="p">);</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>NOTE: when using alternative serializers, entities might need to be annotated with whatever 
+attributes are required by the underlying libraries.</p>
+</blockquote>
+
+<h2 id="attributes">Attributes</h2>
+
+<p>If you want to avoid using strings with the factory methods, you can also annotate the 
+entity type to modify the default values used:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[Table("tableName")]</code>: class-level attribute to change the default when no value is provided</li>
+  <li><code class="language-plaintext highlighter-rouge">[PartitionKey]</code>: annotates the property that should be used as the partition key</li>
+  <li><code class="language-plaintext highlighter-rouge">[RowKey]</code>: annotates the property that should be used as the row key.</li>
+</ul>
+
+<p>Values passed to the factory methods override declarative attributes.</p>
+
+<p>For the products example above, your record entity could be:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="nf">Table</span><span class="p">(</span><span class="s">"Products"</span><span class="p">)]</span>
+<span class="k">public</span> <span class="n">record</span> <span class="nf">Product</span><span class="p">([</span><span class="n">PartitionKey</span><span class="p">]</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="p">[</span><span class="n">RowKey</span><span class="p">]</span> <span class="kt">string</span> <span class="n">Id</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="k">public</span> <span class="kt">string</span><span class="p">?</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And creating the repository wouldn’t require any arguments besides the storage account:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TableRepository</span><span class="p">.</span><span class="n">Create</span><span class="p">&lt;</span><span class="n">Product</span><span class="p">&gt;(</span><span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>In addition, if you want to omit a particular property from persistence, you can annotate 
+it with <code class="language-plaintext highlighter-rouge">[Browsable(false)]</code> and it will be skipped when persisting and reading the entity.</p>
+
+<h2 id="tableentity-support">TableEntity Support</h2>
+
+<p>Since these repository APIs are quite a bit more intuitive than working directly against a<br />
+<code class="language-plaintext highlighter-rouge">TableClient</code>, you might want to retrieve/enumerate entities just by their built-in <code class="language-plaintext highlighter-rouge">TableEntity</code> 
+properties, like <code class="language-plaintext highlighter-rouge">PartitionKey</code>, <code class="language-plaintext highlighter-rouge">RowKey</code>, <code class="language-plaintext highlighter-rouge">Timestamp</code> and <code class="language-plaintext highlighter-rouge">ETag</code>. For this scenario, we 
+also support creating <code class="language-plaintext highlighter-rouge">ITableRepository&lt;TableEntity&gt;</code> and <code class="language-plaintext highlighter-rouge">ITablePartition&lt;TableEntity&gt;</code> 
+by using the factory methods <code class="language-plaintext highlighter-rouge">TableRepository.Create(...)</code> and <code class="language-plaintext highlighter-rouge">TablePartition.Create(...)</code> 
+without a (generic) entity type argument.</p>
+
+<p>For example, given you know all <code class="language-plaintext highlighter-rouge">Region</code> entities saved in the example above, use the region <code class="language-plaintext highlighter-rouge">Code</code> 
+as the <code class="language-plaintext highlighter-rouge">RowKey</code>, you could simply enumerate all regions without using the <code class="language-plaintext highlighter-rouge">Region</code> type at all:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">account</span> <span class="p">=</span> <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">DevelopmentStorageAccount</span><span class="p">;</span> <span class="c1">// or production one</span>
+<span class="kt">var</span> <span class="n">repo</span> <span class="p">=</span> <span class="n">TablePartition</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">storageAccount</span><span class="p">,</span> 
+  <span class="n">tableName</span><span class="p">:</span> <span class="s">"Reference"</span><span class="p">,</span>
+  <span class="n">partitionKey</span><span class="p">:</span> <span class="s">"Region"</span><span class="p">);</span>
+
+<span class="c1">// Enumerate all regions within the partition as plain TableEntities</span>
+<span class="k">await</span> <span class="k">foreach</span> <span class="p">(</span><span class="n">TableEntity</span> <span class="n">region</span> <span class="k">in</span> <span class="n">repo</span><span class="p">.</span><span class="nf">EnumerateAsync</span><span class="p">())</span>
+   <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">region</span><span class="p">.</span><span class="n">RowKey</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>You can access and add additional properties by just using the entity indexer, which you can 
+later persist by calling <code class="language-plaintext highlighter-rouge">PutAsync</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">PutAsync</span><span class="p">(</span>
+    <span class="k">new</span> <span class="nf">TableEntity</span><span class="p">(</span><span class="s">"Book"</span><span class="p">,</span> <span class="s">"9781473217386"</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="p">[</span><span class="s">"Title"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"Neuromancer"</span><span class="p">,</span>
+        <span class="p">[</span><span class="s">"Price"</span><span class="p">]</span> <span class="p">=</span> <span class="m">7.32</span>
+    <span class="p">});</span>
+
+<span class="kt">var</span> <span class="n">entity</span> <span class="p">=</span> <span class="k">await</span> <span class="n">repo</span><span class="p">.</span><span class="nf">GetAsync</span><span class="p">(</span><span class="s">"Book"</span><span class="p">,</span> <span class="s">"9781473217386"</span><span class="p">);</span>
+
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="s">"Neuromancer"</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="s">"Title"</span><span class="p">]);</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">7.32</span><span class="p">,</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">entity</span><span class="p">[</span><span class="s">"Price"</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<!-- #content -->
+
+<h2 id="installation">Installation</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; Install-Package Devlooped.TableStorage
+</code></pre></div></div>
+
+<p>All packages also come in source-only versions, if you want to avoid an additional assembly dependency:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; Install-Package Devlooped.TableStorage.Source
+</code></pre></div></div>
+
+<p>The source-only packages includes all types with the default visibility (internal), so you can decide 
+what types to make public by declaring a partial class with the desired visibility. To make them all 
+public, for example, you can include the same <a href="https://github.com/devlooped/TableStorage/blob/main/src/TableStorage/Visibility.cs">Visibility.cs</a> 
+that the compiled version uses.</p>
+
+<h2 id="dogfooding">Dogfooding</h2>
+
+<p><a href="https://pkg.kzu.io/index.json"><img src="https://img.shields.io/endpoint?url=https://shields.kzu.io/vpre/Devlooped.TableStorage/main&amp;label=nuget.ci&amp;color=brightgreen" alt="CI Version" /></a>
+<a href="https://github.com/devlooped/TableStorage/actions"><img src="https://github.com/devlooped/TableStorage/workflows/build/badge.svg?branch=main" alt="Build" /></a></p>
+
+<p>We also produce CI packages from branches and pull requests so you can dogfood builds as quickly as they are produced.</p>
+
+<p>The CI feed is <code class="language-plaintext highlighter-rouge">https://pkg.kzu.io/index.json</code>.</p>
+
+<p>The versioning scheme for packages is:</p>
+
+<ul>
+  <li>PR builds: <em>42.42.42-pr</em><code class="language-plaintext highlighter-rouge">[NUMBER]</code></li>
+  <li>Branch builds: <em>42.42.42-</em><code class="language-plaintext highlighter-rouge">[BRANCH]</code>.<code class="language-plaintext highlighter-rouge">[COMMITS]</code></li>
+</ul>
+
+<!-- #sponsors -->
+<!-- include https://github.com/devlooped/sponsors/raw/main/footer.md -->
+<h1 id="sponsors">Sponsors</h1>
+
+<!-- sponsors.md -->
+<p><a href="https://github.com/clarius"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/clarius.png" alt="Clarius Org" title="Clarius Org" /></a>
+<a href="https://github.com/KirillOsenkov"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/KirillOsenkov.png" alt="Kirill Osenkov" title="Kirill Osenkov" /></a>
+<a href="https://github.com/MFB-Technologies-Inc"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/MFB-Technologies-Inc.png" alt="MFB Technologies, Inc." title="MFB Technologies, Inc." /></a>
+<a href="https://github.com/torutek-gh"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/torutek-gh.png" alt="Torutek" title="Torutek" /></a>
+<a href="https://github.com/drivenet"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/drivenet.png" alt="DRIVE.NET, Inc." title="DRIVE.NET, Inc." /></a>
+<a href="https://github.com/Keflon"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/Keflon.png" alt="Keith Pickford" title="Keith Pickford" /></a>
+<a href="https://github.com/tbolon"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/tbolon.png" alt="Thomas Bolon" title="Thomas Bolon" /></a>
+<a href="https://github.com/kfrancis"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/kfrancis.png" alt="Kori Francis" title="Kori Francis" /></a>
+<a href="https://github.com/twenzel"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/twenzel.png" alt="Toni Wenzel" title="Toni Wenzel" /></a>
+<a href="https://github.com/unoplatform"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/unoplatform.png" alt="Uno Platform" title="Uno Platform" /></a>
+<a href="https://github.com/dansiegel"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/dansiegel.png" alt="Dan Siegel" title="Dan Siegel" /></a>
+<a href="https://github.com/rbnswartz"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/rbnswartz.png" alt="Reuben Swartz" title="Reuben Swartz" /></a>
+<a href="https://github.com/jfoshee"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/jfoshee.png" alt="Jacob Foshee" title="Jacob Foshee" /></a>
+<a href="https://github.com/eajhnsn1"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/Mrxx99.png" alt="" title="&quot;)](https://github.com/Mrxx99)
+[![Eric Johnson](https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/eajhnsn1.png &quot;Eric Johnson" /></a>
+<a href="https://github.com/IxTechnologies"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/IxTechnologies.png" alt="Ix Technologies B.V." title="Ix Technologies B.V." /></a>
+<a href="https://github.com/davidjenni"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/davidjenni.png" alt="David JENNI" title="David JENNI" /></a>
+<a href="https://github.com/Jonathan-Hickey"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/Jonathan-Hickey.png" alt="Jonathan " title="Jonathan " /></a>
+<a href="https://github.com/akunzai"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/akunzai.png" alt="Charley Wu" title="Charley Wu" /></a>
+<a href="https://github.com/jakobt"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/jakobt.png" alt="Jakob Tikjøb Andersen" title="Jakob Tikjøb Andersen" /></a>
+<a href="https://github.com/seanalexander"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/seanalexander.png" alt="Seann Alexander" title="Seann Alexander" /></a>
+<a href="https://github.com/tinohager"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/tinohager.png" alt="Tino Hager" title="Tino Hager" /></a>
+<a href="https://github.com/ploeh"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/ploeh.png" alt="Mark Seemann" title="Mark Seemann" /></a>
+<a href="https://github.com/KenBonny"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/KenBonny.png" alt="Ken Bonny" title="Ken Bonny" /></a>
+<a href="https://github.com/SimonCropp"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/SimonCropp.png" alt="Simon Cropp" title="Simon Cropp" /></a>
+<a href="https://github.com/agileworks-eu"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/agileworks-eu.png" alt="agileworks-eu" title="agileworks-eu" /></a>
+<a href="https://github.com/sorahex"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/sorahex.png" alt="sorahex" title="sorahex" /></a>
+<a href="https://github.com/arsdragonfly"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/arsdragonfly.png" alt="Zheyu Shen" title="Zheyu Shen" /></a>
+<a href="https://github.com/vezel-dev"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/vezel-dev.png" alt="Vezel" title="Vezel" /></a>
+<a href="https://github.com/ChilliCream"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/ChilliCream.png" alt="ChilliCream" title="ChilliCream" /></a>
+<a href="https://github.com/4OTC"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/4OTC.png" alt="4OTC" title="4OTC" /></a>
+<a href="https://github.com/v-limo"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/.github/avatars/v-limo.png" alt="Vincent Limo" title="Vincent Limo" /></a></p>
+
+<!-- sponsors.md -->
+
+<p><a href="https://github.com/sponsors/devlooped"><img src="https://raw.githubusercontent.com/devlooped/sponsors/main/sponsor.png" alt="Sponsor this project" title="Sponsor this project" /></a>
+ </p>
+
+<p><a href="https://github.com/sponsors">Learn more about GitHub Sponsors</a></p>
+
+<!-- https://github.com/devlooped/sponsors/raw/main/footer.md -->
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">TableStorage maintained by <a href="https://github.com/devlooped">devlooped</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+  </body>
+</html>
